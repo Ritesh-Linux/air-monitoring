@@ -6,7 +6,6 @@
 #define BUZZERPIN D3
 #define MQ135PIN A0
 #define DHTPIN D1
-#define RZERO 494.63
 
 MQ135 mq135_sensor(MQ135PIN);
 DHTesp dht;

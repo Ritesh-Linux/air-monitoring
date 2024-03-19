@@ -5,6 +5,8 @@
 #include <WebSocketsServer.h>
 #include <ArduinoJson.h>
 
+#include "htmlPage.h"
+
 AsyncWebServer server(80);
 WebSocketsServer webSocket(81);
 
@@ -21,84 +23,6 @@ void flush() {
     json.clear();
     jsonString = "";
 }
-
-char html[] PROGMEM = R"(
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <script src="https://cdn.tailwindcss.com"></script>
-        <style>
-            table {
-                width: 100%;
-            }
-            td {
-                padding: 6px;
-            }
-            table tr td:nth-child(1) {
-                text-align: left;
-            }
-            table tr td:nth-child(2) {
-                text-align: right;
-            }
-        </style>
-    </head>
-    <body>
-        <div
-            class="shadow-[0_20px_50px_rgba(8,_112,_184,_0.7)] w-[320px] mx-auto rounded-xl mt-4"
-        >
-            <div class="px-8 py-4">
-                <div
-                    class="font-bold text-xl mb-4 text-[rgba(8,_112,_184,_1)] text-center"
-                >
-                    Weather Details
-                </div>
-                <table>
-                    <tr>
-                        <td>Humidity :</td>
-                        <td id="humidity">54 %</td>
-                    </tr>
-                    <tr>
-                        <td>Temperature :</td>
-                        <td id="temperature">27 °C</td>
-                    </tr>
-                    <tr>
-                        <td>Air Quality :</td>
-                        <td id="air">80 ppm</td>
-                    </tr>
-                    <tr>
-                        <td>AQI Status :</td>
-                        <td id="status">Good Air</td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-        <p id="value" class="mt-12 text-center"></p>
-        <script>
-            socket = new WebSocket('ws://' + location.host + ':81')
-            socket.onopen = (e) => {
-                console.log('[socket] socket.onopen')
-            }
-            socket.onerror = (e) => {
-                console.log('[socket] socket.onerror')
-            }
-            socket.onmessage = (e) => {
-                const dataString = e.data
-                if (dataString !== 'Connected') {
-					const data = JSON.parse(dataString)
-					console.log(data)
-                    document.getElementById('humidity').innerHTML = data.humidity
-                    document.getElementById('temperature').innerHTML = data.temperature
-                    document.getElementById('air').innerHTML = data.air
-                    document.getElementById('status').innerHTML = data.status
-                }
-                document.getElementById('value').innerHTML = e.data
-            }
-        </script>
-    </body>
-</html>
-)";
 
 void wifiSetup() {
     WiFi.begin(ssid, pass);
@@ -121,7 +45,7 @@ void mdnsSetup() {
 
 void serverSetup() {
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request -> send(200, "text/html", html);
+        request -> send(200, "text/html", htmlPage);
     });
     server.on("/api/monitoring", HTTP_GET, [](AsyncWebServerRequest *request){
         request -> send(200, "application/json", jsonString);
